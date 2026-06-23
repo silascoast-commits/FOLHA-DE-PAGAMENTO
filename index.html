@@ -147,6 +147,32 @@
     font-size: .78rem;
   }
 
+  /* Células editáveis (lançamento de apontamento direto na tabela) */
+  td:has(input.cel-edit) { padding: 0; }
+  input.cel-edit {
+    width: 100%;
+    min-width: 78px;
+    padding: 7px 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-size: .85rem;
+    font-family: inherit;
+    text-align: right;
+    color: #222;
+    border-radius: 4px;
+  }
+  input.cel-edit[type="text"] { text-align: left; }
+  input.cel-edit:hover { background: var(--azul-claro); }
+  input.cel-edit:focus {
+    outline: none;
+    border-color: var(--azul);
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(10,77,140,.15);
+  }
+  input.cel-edit.destaque { color: var(--vermelho); font-weight: 600; }
+  input.cel-edit.salario { color: var(--verde); font-weight: 700; }
+  input.cel-edit::placeholder { color: #bbb; }
+
   footer {
     text-align: center;
     padding: 16px;
@@ -233,93 +259,52 @@
   <input type="file" id="importFile" accept="application/json">
 </div>
 
+<div style="padding:0 24px;">
+  <p style="background:#fff9e0;border:1px solid #f0d97a;border-radius:6px;padding:8px 14px;font-size:.82rem;color:#5a4a00;margin:14px 0 0 0;">
+    💡 Dica: clique em qualquer célula numérica da tabela (HE, faltas, atrasos, VT/VR/VA, descontos...) e digite o valor direto.
+    Aperte <strong>Enter</strong> para confirmar e pular para a mesma coluna na linha de baixo, como numa planilha. Não precisa abrir formulário.
+  </p>
+</div>
+
 <div class="resumo" id="resumo"></div>
 
 <main id="conteudo"></main>
 
 <footer>Gerado automaticamente a partir da folha de apontamentos mensal. Os dados ficam salvos no navegador (localStorage).</footer>
 
-<!-- Modal de funcionário (adicionar/editar) -->
+<!-- Modal de funcionário (cadastro: adicionar/editar dados fixos) -->
 <div class="overlay" id="overlayFuncionario">
   <div class="modal">
     <h2 id="tituloModal">Adicionar funcionário</h2>
+    <p style="margin-top:-8px;color:#777;font-size:.82rem;">
+      Aqui você cadastra só os dados fixos. As horas, faltas, VT/VR/VA e descontos do mês
+      são lançados direto nas células da tabela.
+    </p>
     <input type="hidden" id="f_index">
     <div class="grid3">
       <div class="campo">
         <label>Código</label>
         <input type="text" id="f_codigo" placeholder="Ex: 000119">
       </div>
-      <div class="campo">
+      <div class="campo" style="grid-column: span 2;">
         <label>Nome do colaborador</label>
         <input type="text" id="f_nome">
-      </div>
-      <div class="campo">
-        <label>Cargo</label>
-        <input type="text" id="f_cargo">
       </div>
     </div>
     <div class="grid2">
       <div class="campo">
-        <label>Centro de custo</label>
-        <input type="text" id="f_centro" list="lista_centros" placeholder="Ex: NAVEGANTES">
-        <datalist id="lista_centros"></datalist>
+        <label>Cargo</label>
+        <input type="text" id="f_cargo">
       </div>
       <div class="campo">
         <label>Salário</label>
         <input type="number" step="0.01" id="f_salario">
       </div>
     </div>
-    <div class="grid3">
-      <div class="campo">
-        <label>Dias de salário</label>
-        <input type="text" id="f_dias" placeholder="30, 12, INSS, FÉRIAS...">
-      </div>
-      <div class="campo">
-        <label>HE 50%</label>
-        <input type="number" step="0.01" id="f_he50">
-      </div>
-      <div class="campo">
-        <label>HE 100%</label>
-        <input type="number" step="0.01" id="f_he100">
-      </div>
-    </div>
-    <div class="grid3">
-      <div class="campo">
-        <label>Adicional noturno</label>
-        <input type="number" step="0.01" id="f_noturno">
-      </div>
-      <div class="campo">
-        <label>Faltas</label>
-        <input type="number" step="0.01" id="f_faltas">
-      </div>
-      <div class="campo">
-        <label>Atrasos</label>
-        <input type="number" step="0.01" id="f_atrasos">
-      </div>
-    </div>
-    <div class="grid3">
-      <div class="campo">
-        <label>VT pago</label>
-        <input type="number" step="0.01" id="f_vt">
-      </div>
-      <div class="campo">
-        <label>VR pago</label>
-        <input type="number" step="0.01" id="f_vr">
-      </div>
-      <div class="campo">
-        <label>VA pago</label>
-        <input type="number" step="0.01" id="f_va">
-      </div>
-    </div>
-    <div class="grid2">
-      <div class="campo">
-        <label>Desconto convênio</label>
-        <input type="number" step="0.01" id="f_descConvenio">
-      </div>
-      <div class="campo">
-        <label>Valor pago convênio médico</label>
-        <input type="number" step="0.01" id="f_convenio">
-      </div>
+    <div class="campo">
+      <label>Centro de custo</label>
+      <input type="text" id="f_centro" list="lista_centros" placeholder="Ex: NAVEGANTES">
+      <datalist id="lista_centros"></datalist>
     </div>
     <div class="modal-acoes">
       <button class="cancelar" onclick="fecharModalFuncionario()">Cancelar</button>
@@ -350,7 +335,10 @@
       </div>
     </div>
     <div class="campo">
-      <label><input type="checkbox" id="np_copiar" style="width:auto;display:inline-block;margin-right:6px;" checked> Copiar funcionários do mês atual</label>
+      <label><input type="checkbox" id="np_copiar" style="width:auto;display:inline-block;margin-right:6px;" checked> Copiar funcionários do mês atual (nome, código, cargo, centro e salário)</label>
+    </div>
+    <div class="campo">
+      <label><input type="checkbox" id="np_zerar" style="width:auto;display:inline-block;margin-right:6px;" checked> Deixar o apontamento em branco para eu preencher (recomendado)</label>
     </div>
     <div class="modal-acoes">
       <button class="cancelar" onclick="fecharModalPeriodo()">Cancelar</button>
@@ -369,20 +357,30 @@ const COLS = [
   {k:"CODIGO", l:"Código"},
   {k:"COLABORADOR", l:"Colaborador"},
   {k:"CARGO", l:"Cargo"},
-  {k:"SALÁRIO", l:"Salário", money:true, cls:"salario"},
-  {k:"DIAS DE SALARIO", l:"Dias Sal."},
-  {k:"QTD HE 50%", l:"HE 50%"},
-  {k:"QTD HE 100%", l:"HE 100%"},
-  {k:"QTD ADICIONAL NOTURNO", l:"Ad. Noturno"},
-  {k:"FALTAS", l:"Faltas", destaque:true},
-  {k:"ATRASOS", l:"Atrasos", destaque:true},
-  {k:"DESCONTO CONVÊNIO", l:"Desc. Convênio", money:true},
-  {k:"DESCONTO EMPRÉSTIMO", l:"Desc. Empréstimo", money:true},
-  {k:"VT Á PAGAR ", l:"VT a Pagar", money:true},
-  {k:"VALORES PAGO DE VT", l:"VT Pago", money:true},
-  {k:"VALORES PAGO DE VR", l:"VR Pago", money:true},
-  {k:"VALORES PAGO DE VA", l:"VA Pago", money:true},
-  {k:"VALORES PAGOS DE CONVÊNIO MÉDICO", l:"Convênio Médico", money:true},
+  {k:"SALÁRIO", l:"Salário", money:true, cls:"salario", editable:true},
+  {k:"DIAS DE SALARIO", l:"Dias Sal.", editable:true, texto:true},
+  {k:"QTD HE 50%", l:"HE 50%", editable:true},
+  {k:"QTD HE 100%", l:"HE 100%", editable:true},
+  {k:"QTD ADICIONAL NOTURNO", l:"Ad. Noturno", editable:true},
+  {k:"FALTAS", l:"Faltas", destaque:true, editable:true},
+  {k:"ATRASOS", l:"Atrasos", destaque:true, editable:true},
+  {k:"DESCONTO CONVÊNIO", l:"Desc. Convênio", money:true, editable:true},
+  {k:"DESCONTO EMPRÉSTIMO", l:"Desc. Empréstimo", money:true, editable:true},
+  {k:"VT Á PAGAR ", l:"VT a Pagar", money:true, editable:true},
+  {k:"VALORES PAGO DE VT", l:"VT Pago", money:true, editable:true},
+  {k:"VALORES PAGO DE VR", l:"VR Pago", money:true, editable:true},
+  {k:"VALORES PAGO DE VA", l:"VA Pago", money:true, editable:true},
+  {k:"VALORES PAGOS DE CONVÊNIO MÉDICO", l:"Convênio Médico", money:true, editable:true},
+];
+
+// Campos de apontamento mensal: zerados quando se cria um novo mês "em branco"
+const CAMPOS_APONTAMENTO = [
+  "DIAS DE SALARIO", "QTD HE 50%", "QTD HE 100%", "QTD ADICIONAL NOTURNO",
+  "QTD ADICIONAL NOTURNO - DSR", "FALTAS", "DESCONTO DE DSR SOBRE FALTA",
+  "DESCONTO CONVÊNIO", "ATRASOS", "VT Á PAGAR ", "PERICULOSIDADE",
+  "GRATIFICAÇÃO", "DIAS DE FALTAS_VR", "DESCONTO DE VALOR VR_FALTAS",
+  "DESCONTO DE VALOR VT_FALTAS", "DESCONTO EMPRÉSTIMO", "VALORES PAGO DE VT",
+  "VALORES PAGO DE VR", "VALORES PAGO DE VA", "VALORES PAGOS DE CONVÊNIO MÉDICO"
 ];
 
 const CAMPOS_VAZIOS = {
@@ -503,9 +501,17 @@ function renderTabela(listaFiltrada){
       const idx = lista.indexOf(d);
       const tds = COLS.map(col => {
         const v = d[col.k];
-        const cls = ["num"];
         if (col.k === "COLABORADOR") return `<td class="nome">${v}</td>`;
-        if (col.destaque && typeof v === "number" && v > 0) cls.push("destaque");
+        if (col.editable) {
+          const tipo = col.texto ? "text" : "number";
+          const step = col.texto ? "" : 'step="0.01"';
+          const valor = (v === null || v === undefined) ? "" : v;
+          let cls = "cel-edit";
+          if (col.cls) cls += " " + col.cls;
+          if (col.destaque && typeof v === "number" && v > 0) cls += " destaque";
+          return `<td><input class="${cls}" type="${tipo}" ${step} value="${String(valor).replace(/"/g,'&quot;')}" data-idx="${idx}" data-key="${col.k.replace(/"/g,'&quot;')}" title="${col.l}"></td>`;
+        }
+        const cls = ["num"];
         if (col.cls) cls.push(col.cls);
         return `<td class="${cls.join(' ')}">${fmtVal(v, col)}</td>`;
       }).join("");
@@ -588,10 +594,15 @@ function confirmarNovoPeriodo(){
   const ano = document.getElementById("np_ano").value;
   const chave = `${ano}-${mes}`;
   const copiar = document.getElementById("np_copiar").checked;
+  const zerar = document.getElementById("np_zerar").checked;
   if (!STORE.periodos[chave]) {
-    STORE.periodos[chave] = copiar
-      ? JSON.parse(JSON.stringify(listaAtual()))
-      : [];
+    let novaLista = copiar ? JSON.parse(JSON.stringify(listaAtual())) : [];
+    if (copiar && zerar) {
+      novaLista.forEach(emp => {
+        CAMPOS_APONTAMENTO.forEach(k => { emp[k] = (k === "DIAS DE SALARIO" ? 30 : 0); });
+      });
+    }
+    STORE.periodos[chave] = novaLista;
   }
   STORE.atual = chave;
   saveStore(STORE);
@@ -611,17 +622,6 @@ function abrirModalFuncionario(idx){
   document.getElementById("f_cargo").value = d["CARGO"] || "";
   document.getElementById("f_centro").value = d["CENTRO DE CUSTO"] || "";
   document.getElementById("f_salario").value = d["SALÁRIO"] ?? 0;
-  document.getElementById("f_dias").value = d["DIAS DE SALARIO"] ?? 30;
-  document.getElementById("f_he50").value = d["QTD HE 50%"] ?? 0;
-  document.getElementById("f_he100").value = d["QTD HE 100%"] ?? 0;
-  document.getElementById("f_noturno").value = d["QTD ADICIONAL NOTURNO"] ?? 0;
-  document.getElementById("f_faltas").value = d["FALTAS"] ?? 0;
-  document.getElementById("f_atrasos").value = d["ATRASOS"] ?? 0;
-  document.getElementById("f_vt").value = d["VALORES PAGO DE VT"] ?? 0;
-  document.getElementById("f_vr").value = d["VALORES PAGO DE VR"] ?? 0;
-  document.getElementById("f_va").value = d["VALORES PAGO DE VA"] ?? 0;
-  document.getElementById("f_descConvenio").value = d["DESCONTO CONVÊNIO"] ?? 0;
-  document.getElementById("f_convenio").value = d["VALORES PAGOS DE CONVÊNIO MÉDICO"] ?? 0;
 
   document.getElementById("overlayFuncionario").classList.add("aberto");
 }
@@ -644,18 +644,9 @@ function salvarFuncionario(){
   registro["CARGO"] = document.getElementById("f_cargo").value.trim();
   registro["CENTRO DE CUSTO"] = centro;
   registro["SALÁRIO"] = parseFloat(document.getElementById("f_salario").value) || 0;
-  const diasVal = document.getElementById("f_dias").value.trim();
-  registro["DIAS DE SALARIO"] = diasVal === "" ? 30 : (isNaN(diasVal) ? diasVal : parseFloat(diasVal));
-  registro["QTD HE 50%"] = parseFloat(document.getElementById("f_he50").value) || 0;
-  registro["QTD HE 100%"] = parseFloat(document.getElementById("f_he100").value) || 0;
-  registro["QTD ADICIONAL NOTURNO"] = parseFloat(document.getElementById("f_noturno").value) || 0;
-  registro["FALTAS"] = parseFloat(document.getElementById("f_faltas").value) || 0;
-  registro["ATRASOS"] = parseFloat(document.getElementById("f_atrasos").value) || 0;
-  registro["VALORES PAGO DE VT"] = parseFloat(document.getElementById("f_vt").value) || 0;
-  registro["VALORES PAGO DE VR"] = parseFloat(document.getElementById("f_vr").value) || 0;
-  registro["VALORES PAGO DE VA"] = parseFloat(document.getElementById("f_va").value) || 0;
-  registro["DESCONTO CONVÊNIO"] = parseFloat(document.getElementById("f_descConvenio").value) || 0;
-  registro["VALORES PAGOS DE CONVÊNIO MÉDICO"] = parseFloat(document.getElementById("f_convenio").value) || 0;
+  if (idxStr === "" && (registro["DIAS DE SALARIO"] === undefined || registro["DIAS DE SALARIO"] === "")) {
+    registro["DIAS DE SALARIO"] = 30;
+  }
 
   if (idxStr === "") lista.push(registro);
   setListaAtual(lista);
@@ -762,6 +753,40 @@ document.getElementById("overlayFuncionario").addEventListener("click", e => {
 });
 document.getElementById("overlayPeriodo").addEventListener("click", e => {
   if (e.target.id === "overlayPeriodo") fecharModalPeriodo();
+});
+
+// Seleciona o conteúdo da célula ao focar, para digitar por cima mais rápido
+document.getElementById("conteudo").addEventListener("focusin", e => {
+  if (e.target.classList.contains("cel-edit")) e.target.select();
+});
+
+// Edição direta nas células da tabela (lançamento rápido do apontamento mensal)
+document.getElementById("conteudo").addEventListener("change", e => {
+  if (!e.target.classList.contains("cel-edit")) return;
+  const idx = parseInt(e.target.dataset.idx, 10);
+  const key = e.target.dataset.key;
+  const lista = listaAtual();
+  if (!lista[idx]) return;
+  let val = e.target.value;
+  if (e.target.type === "number") {
+    val = val.trim() === "" ? 0 : parseFloat(val.replace(",", "."));
+    if (isNaN(val)) val = 0;
+  }
+  lista[idx][key] = val;
+  setListaAtual(lista);
+  render();
+});
+// Enter confirma o valor e move para a mesma coluna na linha de baixo, como numa planilha
+document.getElementById("conteudo").addEventListener("keydown", e => {
+  if (e.key !== "Enter" || !e.target.classList.contains("cel-edit")) return;
+  e.preventDefault();
+  const idx = parseInt(e.target.dataset.idx, 10);
+  const key = e.target.dataset.key;
+  e.target.blur();
+  setTimeout(() => {
+    const proxima = document.querySelector(`[data-idx="${idx + 1}"][data-key="${key}"]`);
+    if (proxima) proxima.focus();
+  }, 0);
 });
 
 render();
