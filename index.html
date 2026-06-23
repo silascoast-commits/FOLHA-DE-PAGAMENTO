@@ -294,6 +294,7 @@
   <button class="secundario" onclick="exportarBackup()">Gerar Backup</button>
   <button class="secundario" onclick="document.getElementById('importFile').click()">Importar Backup</button>
   <input type="file" id="importFile" accept="application/json">
+  <button class="perigo" onclick="limparTudo()">Limpar todos os dados</button>
 </div>
 
 <div style="padding:0 24px;">
@@ -762,6 +763,18 @@ document.getElementById("importFile").addEventListener("change", function(e){
   };
   reader.readAsText(file);
 });
+
+// ---------- Limpar tudo ----------
+function limparTudo(){
+  if (!confirm("Isso vai apagar TODOS os meses e funcionários salvos neste navegador. Recomendamos gerar um backup antes. Deseja continuar?")) return;
+  if (!confirm("Tem certeza? Essa ação não pode ser desfeita.")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  STORE = { periodos: {}, atual: PERIODO_INICIAL };
+  STORE.periodos[PERIODO_INICIAL] = JSON.parse(JSON.stringify(DADOS_INICIAIS));
+  saveStore(STORE);
+  render();
+  alert("Todos os dados foram apagados.");
+}
 
 async function baixarBlob(blob, nomeArquivo){
   // Em navegadores compatíveis (Chrome/Edge), abre a janela do sistema
