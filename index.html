@@ -264,10 +264,31 @@
   #importFile { display: none; }
 
   @media print {
-    .toolbar, .resumo, td.acoes, th.col-acoes { display: none !important; }
+    .toolbar, .resumo, td.acoes, th.col-acoes, p[style*="fff9e0"] { display: none !important; }
     body { background: #fff; }
     .grupo-titulo { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     thead th { position: static; }
+    main { overflow-x: visible; padding: 0; }
+    table { table-layout: auto; font-size: 8px; }
+    col { width: auto !important; }
+    thead th, tbody td {
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      word-break: break-word;
+      padding: 2px 3px;
+    }
+    td.nome { min-width: 70px; }
+    input.cel-edit {
+      border: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+      width: 100%;
+      min-width: 5.5em;
+      overflow: visible !important;
+      font-size: 8px;
+    }
+    .grupo { page-break-inside: avoid; }
   }
 </style>
 </head>
