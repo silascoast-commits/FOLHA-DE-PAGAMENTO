@@ -88,78 +88,113 @@
   .card-resumo .num { font-size: 1.3rem; font-weight: 700; color: var(--azul); }
   .card-resumo .lbl { font-size: .8rem; color: #666; }
 
-  main { padding: 0 24px 40px 24px; }
+  main { padding: 0 10px 40px 10px; max-width: 100vw; overflow-x: auto; }
 
-  .grupo { margin-bottom: 24px; }
+  .grupo { margin-bottom: 16px; }
   .grupo-titulo {
     background: var(--azul);
     color: #fff;
-    padding: 8px 14px;
+    padding: 6px 10px;
     border-radius: 6px 6px 0 0;
     font-weight: 600;
+    font-size: .82rem;
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 6px;
   }
-  .grupo-titulo .total { font-weight: 400; opacity: .9; font-size: .9rem; }
+  .grupo-titulo .total { font-weight: 400; opacity: .9; font-size: .8rem; }
 
   table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     background: #fff;
-    font-size: .85rem;
+    font-size: .68rem;
   }
+  /* Larguras proporcionais das colunas, para caber tudo sem rolagem lateral */
+  col.col-codigo   { width: 4.2%; }
+  col.col-nome     { width: 11.5%; }
+  col.col-cargo    { width: 9%; }
+  col.col-salario  { width: 5.6%; }
+  col.col-dias     { width: 4.2%; }
+  col.col-he50     { width: 4.4%; }
+  col.col-he100    { width: 4.4%; }
+  col.col-noturno  { width: 4.6%; }
+  col.col-faltas   { width: 4%; }
+  col.col-atrasos  { width: 4.4%; }
+  col.col-descconv { width: 5.4%; }
+  col.col-descemp  { width: 5.6%; }
+  col.col-vtapagar { width: 5%; }
+  col.col-vtpago   { width: 5%; }
+  col.col-vrpago   { width: 5%; }
+  col.col-vapago   { width: 5%; }
+  col.col-convmed  { width: 5.6%; }
+  col.col-acoes    { width: 7.2%; }
+
   thead th {
     background: var(--azul-claro);
     text-align: left;
-    padding: 8px 10px;
+    padding: 4px 4px;
     border-bottom: 2px solid var(--borda);
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.15;
+    word-break: break-word;
     position: sticky;
-    top: 96px;
+    top: var(--toolbar-h, 58px);
+    overflow-wrap: break-word;
   }
   tbody td {
-    padding: 7px 10px;
+    padding: 2px 3px;
     border-bottom: 1px solid var(--borda);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   tbody tr:hover { background: #fafdff; }
   td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  td.nome { white-space: normal; min-width: 200px; font-weight: 600; }
+  td.nome {
+    white-space: normal;
+    font-weight: 600;
+    line-height: 1.15;
+    overflow-wrap: break-word;
+  }
   .destaque { color: var(--vermelho); font-weight: 600; }
   .salario { color: var(--verde); font-weight: 700; }
 
-  td.acoes { white-space: nowrap; }
+  td.acoes { white-space: nowrap; padding: 1px 2px; display: flex; align-items: center; gap: 1px; }
   td.acoes button {
     border: none;
     background: none;
     cursor: pointer;
-    font-size: 1rem;
-    padding: 2px 4px;
+    font-size: .82rem;
+    padding: 1px 2px;
     border-radius: 4px;
+    line-height: 1;
   }
   td.acoes button:hover { background: var(--azul-claro); }
   td.acoes select.realocar {
-    padding: 3px 4px;
+    padding: 1px 1px;
     border-radius: 4px;
     border: 1px solid var(--borda);
-    font-size: .78rem;
+    font-size: .62rem;
+    width: 100%;
+    max-width: 64px;
   }
 
   /* Células editáveis (lançamento de apontamento direto na tabela) */
   td:has(input.cel-edit) { padding: 0; }
   input.cel-edit {
     width: 100%;
-    min-width: 78px;
-    padding: 7px 8px;
+    min-width: 0;
+    padding: 3px 3px;
     border: 1px solid transparent;
     background: transparent;
-    font-size: .85rem;
+    font-size: .68rem;
     font-family: inherit;
     text-align: right;
     color: #222;
-    border-radius: 4px;
+    border-radius: 3px;
   }
   input.cel-edit[type="text"] { text-align: left; }
   input.cel-edit:hover { background: var(--azul-claro); }
@@ -168,6 +203,8 @@
     border-color: var(--azul);
     background: #fff;
     box-shadow: 0 0 0 2px rgba(10,77,140,.15);
+    position: relative;
+    z-index: 2;
   }
   input.cel-edit.destaque { color: var(--vermelho); font-weight: 600; }
   input.cel-edit.salario { color: var(--verde); font-weight: 700; }
@@ -331,7 +368,7 @@
       </div>
       <div class="campo">
         <label>Ano</label>
-        <input type="number" id="np_ano" value="2026">
+        <input type="number" id="np_ano" value="2026" min="2024" max="2050">
       </div>
     </div>
     <div class="campo">
@@ -432,7 +469,11 @@ function fmtVal(v, col){
 }
 function periodoLabel(p){
   const [ano, mes] = p.split("-");
-  return `${MESES[mes] || mes} / ${ano}`;
+  return `${MESES[mes] || mes} / ${ano} (${diasNoMes(p)} dias)`;
+}
+function diasNoMes(p){
+  const [ano, mes] = p.split("-").map(Number);
+  return new Date(ano, mes, 0).getDate();
 }
 
 // ---------- Render: seletor de período ----------
@@ -541,6 +582,14 @@ function renderTabela(listaFiltrada){
           <span class="total">Total salários: ${fmtMoney(totalCentro)}</span>
         </div>
         <table>
+          <colgroup>
+            <col class="col-codigo"><col class="col-nome"><col class="col-cargo">
+            <col class="col-salario"><col class="col-dias"><col class="col-he50">
+            <col class="col-he100"><col class="col-noturno"><col class="col-faltas">
+            <col class="col-atrasos"><col class="col-descconv"><col class="col-descemp">
+            <col class="col-vtapagar"><col class="col-vtpago"><col class="col-vrpago">
+            <col class="col-vapago"><col class="col-convmed"><col class="col-acoes">
+          </colgroup>
           <thead><tr>${head}</tr></thead>
           <tbody>${linhas}</tbody>
         </table>
@@ -598,8 +647,9 @@ function confirmarNovoPeriodo(){
   if (!STORE.periodos[chave]) {
     let novaLista = copiar ? JSON.parse(JSON.stringify(listaAtual())) : [];
     if (copiar && zerar) {
+      const dias = diasNoMes(chave);
       novaLista.forEach(emp => {
-        CAMPOS_APONTAMENTO.forEach(k => { emp[k] = (k === "DIAS DE SALARIO" ? 30 : 0); });
+        CAMPOS_APONTAMENTO.forEach(k => { emp[k] = (k === "DIAS DE SALARIO" ? dias : 0); });
       });
     }
     STORE.periodos[chave] = novaLista;
@@ -645,7 +695,7 @@ function salvarFuncionario(){
   registro["CENTRO DE CUSTO"] = centro;
   registro["SALÁRIO"] = parseFloat(document.getElementById("f_salario").value) || 0;
   if (idxStr === "" && (registro["DIAS DE SALARIO"] === undefined || registro["DIAS DE SALARIO"] === "")) {
-    registro["DIAS DE SALARIO"] = 30;
+    registro["DIAS DE SALARIO"] = diasNoMes(STORE.atual);
   }
 
   if (idxStr === "") lista.push(registro);
@@ -789,7 +839,15 @@ document.getElementById("conteudo").addEventListener("keydown", e => {
   }, 0);
 });
 
+function ajustarAlturaToolbar(){
+  const tb = document.querySelector(".toolbar");
+  if (tb) document.documentElement.style.setProperty("--toolbar-h", tb.offsetHeight + "px");
+}
+window.addEventListener("load", ajustarAlturaToolbar);
+window.addEventListener("resize", ajustarAlturaToolbar);
+
 render();
+ajustarAlturaToolbar();
 </script>
 </body>
 </html>
